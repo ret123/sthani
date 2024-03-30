@@ -1,0 +1,9 @@
+module.exports.authController = require('./auth.controller');
+module.exports.userController = require('./user.controller');
+module.exports.brandController = require('./brand.controller');
+module.exports.productController = require('./product.controller');
+module.exports.categoryController = require('./category.controller');
+module.exports.propertyController = require('./property.controller');
+module.exports.productVariantController = require('./product_variant.controller');
+module.exports.variantPropertiesController = require('./variant_property.controller');
+module.exports.productMediaController = require('./product_media.controller');
