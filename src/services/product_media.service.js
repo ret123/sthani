@@ -8,6 +8,7 @@ const fs = require('fs');
 const createProductMedia = async (body) => {
 
   const newProductMedia = new ProductMedia(body);
+  await newProductMedia.save();
   
   return newProductMedia;
 };

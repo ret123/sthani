@@ -55,7 +55,7 @@ const updateCategoryById = async (req,categoryId, updateBody) => {
 
   if( Object.keys(req.files).length !== 0 && typeof req.files === 'object') {
     console.log(req.files);
-    const banner = uploadSingleFile(req.files.banner[0])
+    const banner = uploadSingleFile(req.files.banner)
     category.banner =  banner;
   } else {
     updateBody.banner = category.banner

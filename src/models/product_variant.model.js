@@ -8,6 +8,11 @@ const productVariantSchema = mongoose.Schema(
         ref: 'Product',
         required: true
     },
+    property_id: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Property',
+        required: false
+    }],
     sku: {
       type: String,
       required: true,
@@ -23,12 +28,12 @@ const productVariantSchema = mongoose.Schema(
     name: {
         type: String,
         required: true,
-        unique: true,
+        // unique: true,
         trim: true
     },
     weight: {
         type: Number,
-        required: true
+        required: false
     },
     length: {
         type: Number,

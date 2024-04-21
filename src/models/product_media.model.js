@@ -19,7 +19,7 @@ const productMediaSchema = mongoose.Schema(
     variant_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'ProductVariant',
-        required: true
+        required: false
     },
     title: {
         type: String,

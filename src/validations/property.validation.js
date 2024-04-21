@@ -10,7 +10,7 @@ const createProperty = {
     options: Joi.array().required(),
   
 
-  }),
+  }).options({ allowUnknown: true })
 };
 
 
@@ -42,11 +42,12 @@ const updateProperty = {
     .keys({
         name: Joi.string(),
         // slug: Joi.string().required(),
-        unit: Joi.string(),
+        unit: Joi.string().optional().allow(null,''),
        
         options: Joi.array(),
     })
-    .min(1),
+    .min(1)
+    .options({ allowUnknown: true }),
 };
 const deleteProperty = {
     params: Joi.object().keys({

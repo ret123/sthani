@@ -14,6 +14,7 @@ const multer = require('multer');
 const path = require('path');
 const adminRoutes = require('./routes/admin');
 const routes = require('./routes/v1');
+const storeRoutes = require('./routes/store')
 const { errorConverter, errorHandler } = require('./middlewares/error');
 const ApiError = require('./utils/ApiError');
 const formDataMiddleware = require('./middlewares/formDataMiddleware');
@@ -68,6 +69,7 @@ if (config.env === 'production') {
 // v1 api routes
 app.use('/v1', routes);
 app.use('/admin', adminRoutes);
+app.use('/store', storeRoutes);
 
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {

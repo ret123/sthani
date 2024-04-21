@@ -4,16 +4,22 @@ const {objectId } = require('./custom.validation');
 const createProductVariant = {
   body: Joi.object().keys({
     product_id: Joi.string().custom(objectId),
+    property_id: Joi.array().items(
+     
+        Joi.string().custom(objectId),
+      
+    ),
     name: Joi.string().required(),
     sku: Joi.string().required(),
     // slug: Joi.string().required(),
     stock: Joi.number().default(0),
-    weight: Joi.number().required(),
+    weight: Joi.number(),
     height: Joi.number(),
     length: Joi.number(),
+    width:  Joi.number(),
     price: Joi.number().required(),
     discounted_price: Joi.number(),
-    price_includes_tax: Joi.boolean(),
+    // price_includes_tax: Joi.boolean(),
     published: Joi.boolean(),
     sales_count: Joi.number().default(0),
 

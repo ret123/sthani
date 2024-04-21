@@ -17,7 +17,7 @@ const propertySchema = mongoose.Schema(
     },
     unit: {
       type: String,
-      required: true,
+      required: false,
       trim: true,
     },
    

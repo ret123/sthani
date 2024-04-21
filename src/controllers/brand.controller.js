@@ -41,7 +41,7 @@ const getBrand = catchAsync(async (req, res) => {
    
     const brand = await brandService.updateBrandById(req.params.brandId, req);
    
-    // res.send(brand);
+    res.send(brand);
   });
 
   const deleteBrand = catchAsync(async (req, res) => {
