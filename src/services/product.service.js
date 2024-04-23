@@ -84,7 +84,7 @@ const queryProducts = async (filter, options) => {
   const updateProductById = async (productId, productBody) => {
     
 
-   console.log(productBody);
+  console.log("Product" + productBody);
 
     try {
       let product = await getProductById(productId);

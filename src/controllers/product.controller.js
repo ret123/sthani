@@ -288,7 +288,7 @@ const getProduct = catchAsync(async (req, res) => {
 
 const updateProduct = catchAsync(async (req, res) => {
   try {
-    // console.log(req.body);
+     console.log(req.body);
     // console.log(req.files);
 
     // if new custom property add to property table

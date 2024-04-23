@@ -7,3 +7,4 @@ module.exports.propertyController = require('./property.controller');
 module.exports.productVariantController = require('./product_variant.controller');
 module.exports.variantPropertiesController = require('./variant_property.controller');
 module.exports.productMediaController = require('./product_media.controller');
+module.exports.customerController = require('./customer.controller');

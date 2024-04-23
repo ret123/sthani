@@ -9,3 +9,4 @@ module.exports.propertyService = require('./property.service');
 module.exports.productVariantService = require('./product_variant.service');
 module.exports.variantPropertyService = require('./variant_property.service');
 module.exports.productMediaService = require('./product_media.service');
+module.exports.customerService = require('./customer.service');

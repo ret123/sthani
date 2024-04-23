@@ -39,6 +39,16 @@ const customerSchema = mongoose.Schema(
         // },
         private: true, // used by the toJSON plugin
       },
+      dob: {
+        type: String,
+        trim: true,
+        required: true
+      },
+      gender: {
+        type: String,
+        trim: true,
+        required: false
+      }
     
   },
   {

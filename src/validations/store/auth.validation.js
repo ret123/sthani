@@ -24,7 +24,9 @@ const register = {
     email: Joi.string().required().email(),
     password: Joi.string().allow(''),
     first_name: Joi.string().required(),
-    last_name: Joi.string().required()
+    last_name: Joi.string().required(),
+    dob: Joi.string().required(),
+    gender: Joi.string().allow(''),
   }),
 };
 

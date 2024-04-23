@@ -6,10 +6,13 @@ const productController = require('../../controllers/product.controller');
 const router = express.Router();
 
 router
+  .get('/getProducts', validate(productValidation.getProducts), productController.getProducts);
+
+
+router
   .route('/')
   .post(auth('manageProducts'), validate(productValidation.createProduct), productController.createProduct)
-  .get(auth('getProducts'), validate(productValidation.getProducts), productController.getProducts);
-
+ 
 router
   .route('/:productId')
   .get(auth('getProducts'), validate(productValidation.getProduct), productController.getProduct)
