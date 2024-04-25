@@ -8,6 +8,7 @@ const propertyRoute = require('./property.route');
 const productVariantRoute = require('./product_variant.route');
 const productMediaRoute = require('./product_media.route');
 const customerRoute = require('./customer.route');
+const homeRoute = require('./home.route');
 
 const config = require('../../config/config');
 
@@ -50,6 +51,10 @@ const defaultRoutes = [
     path: '/customers',
     route: customerRoute
   },
+  {
+    path: '/home',
+    route: homeRoute
+  }
 ];
 
 

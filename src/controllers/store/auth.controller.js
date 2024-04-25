@@ -2,7 +2,7 @@ const httpStatus = require('http-status');
 const catchAsync = require('../../utils/catchAsync');
 const { Vonage } = require('@vonage/server-sdk')
 const otpGenerator = require('otp-generator');
-const { User, OTP } = require('../../models');
+const { User, OTP, Customer } = require('../../models');
 const { customerService } = require('../../services/store');
 const { tokenService } = require('../../services');
 
@@ -38,10 +38,13 @@ const sendOTP = catchAsync(async (req, res) => {
     let otpPayload;
     // Check if user is already present
     if(email) {
-      const checkUserPresent = await User.findOne({ email });
+      const customer = await Customer.findOne({ email });
       // If user found with provided email
-      if (checkUserPresent) {
+      if (customer) {
+        const tokens = await tokenService.generateAuthTokens(customer);
         return res.status(401).json({
+          customer,
+          tokens,
           success: false,
           message: 'User is already registered',
         });
