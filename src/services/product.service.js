@@ -13,6 +13,9 @@ const createProduct = async (productBody) => {
     const cats = productBody.category?.map(cat => {
       return cat.value
     })
+    // console.log(productBody)
+    let add_descriptions = []
+    let add_properties = []
     const product = new Product({
       brand_id: productBody.brand_id,
       sku: productBody.sku,
@@ -36,7 +39,7 @@ const createProduct = async (productBody) => {
       allow_out_of_stock_purchase: productBody.allow_out_of_stock_purchase,
       price: productBody.price,
       discounted_price: productBody.discounted_price,
-      // price_includes_tax: productBody.price_includes_tax,
+      price_includes_tax: productBody.price_includes_tax,
       cost: productBody.cost,
       published: productBody.published,
       categories: cats
@@ -45,7 +48,7 @@ const createProduct = async (productBody) => {
     })
     if(typeof productBody.additional_descriptions !== 'undefined' && productBody.additional_descriptions.length > 0) {
       productBody.additional_descriptions.map((doc,index) => {
-          add_discriptions.push({label:doc.label,value: doc.value })
+          add_descriptions.push({label:doc.label,value: doc.value })
       })
   }
 
@@ -54,9 +57,9 @@ const createProduct = async (productBody) => {
           add_properties.push({label:doc.label,value: doc.value })
       })
   }
-  product.additional_descriptions = add_discriptions;
+  product.additional_descriptions = add_descriptions;
   product.additional_properties = add_properties;
-    product.save();
+     product.save();
     
     return product
 
@@ -145,13 +148,13 @@ const queryProducts = async (filter, options) => {
                 add_properties.push({label:doc.label,value: doc.value })
             })
             product.additional_properties = add_properties;
-            console.log(product.additional_properties)
+            // console.log(product.additional_properties)
     
         }
        
       
       
-      // console.log(product)
+      //  console.log(product)
       await product.save();
       
        return product

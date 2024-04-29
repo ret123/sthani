@@ -6,7 +6,7 @@ const fs = require('fs');
 const generateSlug = require('./generateSlug');
 
 const createProductVariant = async (variant,product,variants) => {
-
+ 
   try {
     const slug = generateSlug(product.name + ' ' + variant.variantName);
   const newProductVariant = new ProductVariant({

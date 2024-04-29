@@ -18,7 +18,7 @@ const otpSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
-    expires: 60 * 5, 
+    expires: 60, 
   },
 });
 
@@ -42,13 +42,13 @@ async function sendVerificationEmail(email, otp) {
 }
 // send email
 
-otpSchema.pre('save', async function (next) {
-  console.log('New document saved to the database');
-  // Only send an sms when a new document is created
-  if (this.isNew) {
-    await sendVerificationEmail(this.email, this.otp);
-    // await sendSMS(this.phone,this.otp)
-  }
-  next();
-});
+// otpSchema.pre('save', async function (next) {
+//   console.log('New document saved to the database');
+//   // Only send an sms when a new document is created
+//   if (this.isNew) {
+//     await sendVerificationEmail(this.email, this.otp);
+//     // await sendSMS(this.phone,this.otp)
+//   }
+//   next();
+// });
 module.exports = mongoose.model('OTP', otpSchema);

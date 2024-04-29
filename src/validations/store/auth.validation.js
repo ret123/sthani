@@ -3,8 +3,8 @@ const Joi = require('joi');
 
 const sendotp = {
   body: Joi.object().keys({
-    email: Joi.string().email().allow(''),
-    phone: Joi.number().allow(''),
+    email: Joi.string().email().allow('').optional(),
+    phone: Joi.number().allow('').optional(),
    
   }),
 };
@@ -21,17 +21,31 @@ const verifyOTP = {
 
 const register = {
   body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().allow(''),
-    first_name: Joi.string().required(),
-    last_name: Joi.string().required(),
-    dob: Joi.string().required(),
-    gender: Joi.string().allow(''),
+    email: Joi.string().email().allow(''),
+    phone: Joi.string().allow(''),
+    // first_name: Joi.string().required(),
+    // last_name: Joi.string().required(),
+    // dob: Joi.string().required(),
+    // gender: Joi.string().allow(''),
+    otp: Joi.number().allow('')
   }),
 };
+
+const login = {
+  body: Joi.object().keys({
+    email: Joi.string().email().allow('').optional(),
+    
+    phone: Joi.string().allow('').optional(),
+    otp: Joi.number().allow('')
+
+    
+  }),
+};
+
 
 module.exports = {
   sendotp,
   verifyOTP,
-  register 
+  register,
+  login 
 };

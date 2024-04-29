@@ -11,7 +11,7 @@ const productVariantSchema = mongoose.Schema(
     property_id: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Property',
-        required: false
+        required: true
     }],
     sku: {
       type: String,

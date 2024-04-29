@@ -14,12 +14,36 @@ const { createProductMedia } = require('./product_media.controller');
 const product_variantModel = require('../models/product_variant.model');
 
 const property_ids = [];
+// const createProperty = async (variants) => {
+//   variants?.map(async (variant) => {
+//     if (variant.name === 'Custom') {
+//       const doc = await Property.findOne({ name: variant.customName });
+//       if (doc) {
+//         console.log('Found documents:', doc);
+//       } else {
+//         const slug = generateSlug(variant.customName);
+//         const property = new Property({
+//           name: variant.customName,
+//           // unit: req.body.unit,
+//           options: variant.options,
+//           slug: slug,
+//         });
+//         const newProperty = await property.save();
+//         return newProperty;
+//         // console.log(newProperty)
+//       }
+//     }
+//   });
+// };
+
 const createProperty = async (variants) => {
-  variants?.map(async (variant) => {
+  const createdProperties = [];
+  await Promise.all(variants.map(async (variant) => {
     if (variant.name === 'Custom') {
       const doc = await Property.findOne({ name: variant.customName });
       if (doc) {
-        console.log('Found documents:', doc);
+        console.log('Found document:', doc);
+        createdProperties.push(doc);
       } else {
         const slug = generateSlug(variant.customName);
         const property = new Property({
@@ -29,17 +53,22 @@ const createProperty = async (variants) => {
           slug: slug,
         });
         const newProperty = await property.save();
-        // console.log(newProperty)
+        console.log('Created new property:', newProperty);
+        createdProperties.push(newProperty);
       }
     }
-  });
+  }));
+  return createdProperties;
 };
 
+
 const findProperties = async (variants) => {
+  // console.log(variants)
   if (variants) {
     for (const prop of variants) {
       let result;
       let propertyId;
+      // console.log(prop)
 
       // Check if variant name is 'Custom'
       if (prop.name === 'Custom') {
@@ -47,17 +76,18 @@ const findProperties = async (variants) => {
       } else {
         result = await Property.findOne({ name: prop.name }).exec();
       }
-
+      // console.log(result)
       if (result) {
         propertyId = result._id;
-
+        //  console.log('property ID: ' + propertyId)
         // Check if propertyId already exists in property_ids array
         if (!property_ids.includes(propertyId)) {
+          // console.log('inside')
           property_ids.push(propertyId);
         }
       }
     }
-
+    
     return property_ids;
   }
 };
@@ -78,8 +108,12 @@ const getImageById = async (imageIdToFind) => {
 const createProduct = catchAsync(async (req, res) => {
   try {
     // Save newly created custom property
+    if(req.body.variants) {
+      const property = await createProperty(req.body.variants);   
+   
+    }
 
-    createProperty(req.body.variants);
+    
     // const newProperty = new Property();
     // console.log(req.body.variants);
     // req.body.variants?.map(async (variant) => {});
@@ -87,7 +121,7 @@ const createProduct = catchAsync(async (req, res) => {
     // create new product
     const product = await productService.createProduct(req.body);
 
-    console.log('product: ' + product);
+    // console.log('product: ' + product);
 
     // save product variant
     if (product) {
@@ -95,7 +129,8 @@ const createProduct = catchAsync(async (req, res) => {
       let savedVariants = [];
 
       await findProperties(req.body.variants);
-      // console.log(property_ids)
+      
+    //  console.log(property_ids)
 
       const createVariantPromises = req.body.productVariant?.map(async (variant) => {
         newVariant = await productVariantService.createProductVariant(variant, product, property_ids);
@@ -228,12 +263,9 @@ const createProduct = catchAsync(async (req, res) => {
           // console.log(media);
           // media.save();
         }
-      } else {
-        // No files uploaded
-        return res.status(400).json({ error: 'No files uploaded' });
-      }
+      } 
     }
-    return res.status(201).json({ message: 'Product created successfully!' });
+     return res.status(201).json({ message: 'Product created successfully!' });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -259,6 +291,7 @@ const getProduct = catchAsync(async (req, res) => {
   const brand = await Brand.findById(product.brand_id);
 
   const productVariant = await ProductVariant.find({ product_id: product._id }).exec();
+  console.log(productVariant)
 
   const productMedia = await ProductMedia.find({ product_id: product._id }).exec();
 
@@ -275,7 +308,7 @@ const getProduct = catchAsync(async (req, res) => {
       .flat();
   }
 
-  // console.log('Variant Properties:', variantProperties);
+  console.log('Variant Properties:', variantProperties);
 
   res.send({
     product: product,

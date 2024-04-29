@@ -11,7 +11,7 @@ const createCategory = async (req) => {
 
      console.log(req.files)
  
-    const banner = uploadSingleFile(req.files.banner[0])
+    const banner = uploadSingleFile(req.files.banner)
     
   
     const slug = generateSlug(req.body.name);
