@@ -2,10 +2,12 @@ const httpStatus = require('http-status');
 const catchAsync = require('../../utils/catchAsync');
 const { Vonage } = require('@vonage/server-sdk');
 const otpGenerator = require('otp-generator');
-const { User, OTP, Customer } = require('../../models');
+const { User, OTP, Customer, Token } = require('../../models');
 const { customerService } = require('../../services/store');
 const { tokenService, authService } = require('../../services');
 const mailSender = require('../../utils/mailSender');
+const config = require('../../config/config');
+const jwt = require('jsonwebtoken');
 
 async function sendSMS(phone, otp) {
   // console.log(phone)
@@ -21,7 +23,7 @@ async function sendSMS(phone, otp) {
       .send({ to, from, text })
       .then((resp) => {
         console.log('Message sent successfully');
-        console.log(resp);
+        return true
       })
       .catch((err) => {
         console.log('There was an error sending the messages.');
@@ -41,6 +43,7 @@ async function sendVerificationEmail(email, otp) {
          <p>Here is your OTP code: ${otp}</p>`
       );
       console.log('Email sent successfully: ', mailResponse);
+      return true
     } catch (error) {
       console.log('Error occurred while sending email: ', error);
       throw error;
@@ -75,27 +78,31 @@ const sendOTP = async (email, phone) => {
       }
       if (email) {
         otpPayload = { email, otp };
-        await OTP.create(otpPayload);
-        await sendVerificationEmail(email, otp);
+        
+        if(await sendVerificationEmail(email, otp)) {
+          await OTP.create(otpPayload);
+        };
+
       }
       if (phone) {
         otpPayload = { phone, otp };
-        await OTP.create(otpPayload);
-        await sendSMS(phone, otp);
+       
+        if(await sendSMS(phone, otp)) {
+         await OTP.create(otpPayload);
+         }
       }
-      console.log('here')
-      return {"status": true, "message": "Otp sent successfully" };
+     
+      return {status: 202, message: "Otp sent successfully" };
     }  else return {
-      "status": false,
-      "message": "OTP requested too early",
+      status:  429,
+      message: "Too Many Requests: Please wait at least 60 seconds before requesting another OTP"
       };
-
-   
-
-   
+  
   } catch (error) {
-    console.error('Error sending OTP:', error.message);
-    throw error;
+    throw {
+      "status": 504,
+      "message": "Gateway timeout: Could not send OTP, please try again"
+  };
   }
 };
 
@@ -134,7 +141,7 @@ const check_user_exists = async (email, phone) => {
     response = await Customer.findOne({ phone }).exec();
     type = 'phone';
   }
-  console.log(response);
+  // console.log(response);
   if (response) {
     return true;
   } else {
@@ -151,36 +158,47 @@ const register = catchAsync(async (req, res) => {
     // user shud never exist in case of registration, so check that first.
     // console.log(await check_user_exists(email, phone))
     if (! await check_user_exists(email, phone)) {
-      console.log('user does not exist');
+      // console.log('user does not exist');
       if (!otp) {
         result =  await sendOTP(email, phone);
         // console.log(result)
-        return res.status(202).json(result);
+        if(result.status === 202) {
+          res.status(202).json({status: result.status,message: result.message});
+         }
+         if(result.status === 429) {
+          res.status(429).json({status: result.status,message: result.message});
+         }
+      
       }  else {
         // means we are on 2nd level of registration, with otp
         console.log('verify')
         if(await verifyOTP(otp,phone,email)) { // match otp with db
           const customer = await customerService.createCustomer({email,phone});
-          console.log(customer);
-         
+        
           // response = await OTP.delete({ otp }).exec();
             if(customer) {
               const tokens = await tokenService.generateAuthTokens(customer);
               await OTP.deleteOne({otp}).exec();
+              res.cookie('refreshToken', tokens.refresh.token, {
+                httpOnly: true,
+                // secure: true,
+                // sameSite: 'None',
+                maxAge: 7 * 24 * 60 * 60 * 1000
+            })
                 return res.status(201).json({
                     tokens,
-                    status: true,
+                    status: 201,
                     message: "Registration successful"
                 });
             }
 
         } else {
-          return res.json({"success": false, "message": "Invalid OTP"})
+          res.status(400).json({status: 400, message: "Invalid OTP"})
         }
 
     }
     } else {
-      return res.json({"success": false, "message": "User exist"})
+       res.status(404).json({status: 404, message: "User does not exist"})
       // console.log('user exist');
     }
 
@@ -201,8 +219,14 @@ const login = catchAsync(async (req, res) => {
      
       if (!otp) {
         result =  await sendOTP(email, phone);
-        // console.log(result)
-        return res.status(202).json(result);
+        
+         if(result.status === 202) {
+          res.status(202).json({status: result.status,message: result.message});
+         }
+         if(result.status === 429) {
+          res.status(429).json({status: result.status,message: result.message});
+         }
+       
       }  else {
         // means we are on 2nd level of registration, with otp
        
@@ -214,21 +238,27 @@ const login = catchAsync(async (req, res) => {
             if(customer) {
               const tokens = await tokenService.generateAuthTokens(customer);
               await OTP.deleteOne({otp}).exec();
-                return res.status(201).json({
-                    customers,
+              res.cookie('refreshToken', tokens.refresh.token, {
+                httpOnly: true,
+                // secure: true,
+                // sameSite: 'None',
+                maxAge: 7 * 24 * 60 * 60 * 1000
+            })
+                return res.status(200).json({
+                    
                     tokens,
-                    status: true,
+                    status: 200,
                     message: "Login successful"
                 });
             }
 
         } else {
-          return res.json({"success": false, "message": "Invalid OTP"})
+           res.status(400).json({status: 400, message: "Invalid OTP"})
         }
 
     }
     } else {
-      return res.json({"success": false, "message": "User does not exist"})
+       res.status(404).json({status: 404, message: "User does not exist"})
       // console.log('user exist');
     }
 
@@ -241,10 +271,46 @@ const login = catchAsync(async (req, res) => {
 
   })
 
+  const refreshToken = catchAsync(async (req,res) => {
+    const cookies = req.cookies
+   
+
+    if(!cookies?.refreshToken) return res.status(401).json({message: 'Unauthorized'})
+    const refreshToken = cookies.refreshToken
+    jwt.verify(
+        refreshToken,
+        config.jwt.secret,
+        catchAsync(async(err,decoded) => {
+            if(err) return res.status(403).json({message: 'Forbidden'})
+
+            const storedRefreshToken = await Token.findOne({ token: refreshToken });
+            
+            if (!storedRefreshToken || storedRefreshToken.expires < new Date()) {
+              return res.status(401).json({ error: 'Invalid or expired refresh token' });
+          }
+            const customer = await Customer.findById(storedRefreshToken.user)
+            if(!customer) return res.status(401).json({message: 'Unauthorized'})
+
+            const tokens = await tokenService.generateAuthTokens(customer);
+           
+            res.cookie('refreshToken', tokens.refresh.token, {
+              httpOnly: true,
+              // secure: true,
+              // sameSite: 'None',
+              maxAge: 7 * 24 * 60 * 60 * 1000
+          })
+              return res.status(201).json({tokens});
+
+        })
+    )
+}) 
+
+
 
 module.exports = {
   sendOTP,
   verifyOTP,
   register,
   login,
+  refreshToken
 };

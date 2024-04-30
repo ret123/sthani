@@ -11,6 +11,7 @@ const morgan = require('./config/morgan');
 const { jwtStrategy } = require('./config/passport');
 const { authLimiter } = require('./middlewares/rateLimiter');
 const multer = require('multer');
+const cookieParser = require('cookie-parser');
 const path = require('path');
 const adminRoutes = require('./routes/admin');
 const routes = require('./routes/v1');
@@ -58,6 +59,8 @@ app.options('*', cors());
 // jwt authentication
 app.use(passport.initialize());
 passport.use('jwt', jwtStrategy);
+
+app.use(cookieParser());
 
 // limit repeated failed requests to auth endpoints
 if (config.env === 'production') {

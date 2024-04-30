@@ -28,7 +28,7 @@ const register = {
     // dob: Joi.string().required(),
     // gender: Joi.string().allow(''),
     otp: Joi.number().allow('')
-  }),
+  }).xor('email','phone'),
 };
 
 const login = {
