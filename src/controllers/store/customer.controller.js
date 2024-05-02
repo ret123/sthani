@@ -18,32 +18,40 @@ const updateProfile = catchAsync(async (req, res) => {
     const customer = await Customer.findById(payload.sub)
 
     try {
-      const userId = customer._id; // Assuming you have access to the authenticated user's ID
+      const userId = customer._id; 
       const schema = await updateProfileValidation(userId);
-  
-      // Validate request body against the generated schema
       const validationResult = schema.validate(req.body);
   
       if (validationResult.error) {
-        // Handle validation error
-        return res.status(400).json({
-          status: 400,
-          message: "Bad Request: Either email or mobile is required"
+       
+        return res.status(400).json({ error: validationResult.error.details[0].message });
       }
+
+      if(req.body.mobile) {
+        const existingUserWithPhone = await Customer.findOne({'mobile': req.body.mobile})
       
-      );
+          if (existingUserWithPhone && existingUserWithPhone._id.toString() != userId.toString()) {
+           
+          return res.status(400).json({ status: 400, message : "Mobile number is already registered"});
+          }
+        
       }
-  
-      // Proceed with updating the user profile
+      if(req.body.email) {
+        const existingUserWithEmail = await Customer.findOne({'email': req.body.email})
+        if (existingUserWithEmail && existingUserWithEmail._id.toString() != userId.toString()) {
+          return res.status(400).json({ status: 400, message : "Email address is already registered"});
+          }
+      }
+       
        customer.first_name = req.body.first_name;
        customer.last_name = req.body.last_name;
        customer.dob = req.body.dob;
        customer.gender = req.body.gender
-       if(customer.email) {
-        customer.phone = req.body.phone
-       } else {
+    
+        customer.mobile = req.body.mobile
+ 
         customer.email = req.body.email
-       }
+      
        const updatedCustomer = await customer.save();
       res.status(200).json({
         status: 200,
@@ -52,20 +60,15 @@ const updateProfile = catchAsync(async (req, res) => {
     
     );
     } catch (error) {
-      // Handle other errors
+    
       if (error.code === 11000) {
         const duplicateKey = Object.keys(error.keyValue)[0];
         const duplicateValue = error.keyValue[duplicateKey];
-        // res.json({message: `MongoDB validation error:  '${duplicateKey}' with value '${duplicateValue}' already exists.`});
-        res.status(409).json({
-          "status": 409,
-          "message": "Conflict: Email or mobile already exists"
-      })
-  
+        res.json({message: `MongoDB validation error:  '${duplicateKey}' with value '${duplicateValue}' already exists.`});
     } else {
         res.json({message: "Unknown MongoDB validation error."});
     }
-      // res.status(500).json({  error });
+      
     }
     
   })

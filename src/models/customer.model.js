@@ -15,16 +15,16 @@ const customerSchema = mongoose.Schema(
         required: true,
         trim: true,
     },
-    phone: {
+    mobile: {
       type: Number,
-      required: true,
+      required: false,
       trim: true,
-      unique: true,
+      index: true,
   },
     email: {
         type: String,
-        required: true,
-        unique: true,
+        required: false,
+        index: true,
         trim: true,
         lowercase: true,
         validate(value) {
@@ -50,6 +50,20 @@ const customerSchema = mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Custom validation for uniqueness of phone number
+customerSchema.path('mobile').validate(async function(value) {
+  if (value === null) return true; // Allow null values
+  const existingCustomer = await this.constructor.findOne({ mobile: value });
+  return !existingCustomer || existingCustomer._id.equals(this._id);
+}, 'Mobile number must be unique.');
+
+// Custom validation for uniqueness of email
+customerSchema.path('email').validate(async function(value) {
+  if (value === null) return true; // Allow null values
+  const existingCustomer = await this.constructor.findOne({ email: value });
+  return !existingCustomer || existingCustomer._id.equals(this._id);
+}, 'Email must be unique.');
 
 // add plugin that converts mongoose to json
 customerSchema.plugin(toJSON);

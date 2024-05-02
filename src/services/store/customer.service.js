@@ -8,14 +8,15 @@ const { Customer } = require('../../models');
  * @param {Object} userBody
  * @returns {Promise<User>}
  */
-const createCustomer = async ({email,phone}) => {
+const createCustomer = async ({email,mobile}) => {
  
+  
   try {
     if(email) {
       response = await Customer.findOne({email}).exec();
     }
-    if(phone) {
-      response = await Customer.findOne({phone}).exec();
+    if(mobile) {
+      response = await Customer.findOne({mobile}).exec();
     }
        
       if (response) {
@@ -26,10 +27,13 @@ const createCustomer = async ({email,phone}) => {
         })
       } else {
         if(email) {
-          return Customer.create({ email});
+          console.log('email' + email)
+          const cust =  await Customer.create({'email': email});
+          return cust;
         }
-        if(phone) {
-          return Customer.create({ phone});
+        if(mobile) {
+          const cust =  await Customer.create({ mobile});
+          return cust;
         }
         
         
@@ -42,11 +46,11 @@ const createCustomer = async ({email,phone}) => {
 
 
 const updateCustomer = async (body) => {
-  const { email, phone } = body;
+  const { email, mobile } = body;
   try {
     let response;
-    if (phone) {
-      response = await Customer.findOne({'phone': phone}).exec();
+    if (mobile) {
+      response = await Customer.findOne({'mobile': mobile}).exec();
     }
     if(email) {
       response = await Customer.findOne({'email': email}).exec();
@@ -76,12 +80,12 @@ const queryCustomers = async (filter, options) => {
 };
 
 const getUserByEmailOrPhone = async (result) => {
-const {email,phone} = result
+const {email,mobile} = result
 
   try {
     let query;
-    if (phone) {
-        query = {phone};
+    if (mobile) {
+        query = {mobile};
     } else {
         query =  {email} ;
     }

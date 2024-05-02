@@ -9,7 +9,7 @@ const authenticateToken = require('../../middlewares/customerAuth');
 const router = express.Router();
 
 
-router.post('/update-profile', authenticateToken, customerController.updateProfile); 
+router.patch('/update-profile', authenticateToken, customerController.updateProfile); 
 
 
 
